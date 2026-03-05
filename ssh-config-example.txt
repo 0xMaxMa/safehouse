@@ -1,0 +1,7 @@
+# Add to ~/.ssh/config on your VS Code Desktop (client)
+# Adjust values to match your .env file
+
+Host dev-server
+  HostName YOUR_SERVER_IP
+  User dev                    # Use DEV_USER from .env
+  Port 2222                   # Use SSH_PORT from .env

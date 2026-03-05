@@ -1,0 +1,20 @@
+services:
+  docker-builder:
+    image: docker:dind
+    container_name: docker-builder
+    privileged: true
+    environment:
+      DOCKER_TLS_CERTDIR: ""
+    volumes:
+      - docker-builder-data:/var/lib/docker
+      - ./projects:/workspace
+    restart: unless-stopped
+    networks:
+      - devnet
+
+volumes:
+  docker-builder-data:
+
+networks:
+  devnet:
+    external: true

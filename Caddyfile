@@ -1,0 +1,16 @@
+# Use real domain → Caddy auto-provisions HTTPS
+# Replace code.yourdomain.com, openclaw.yourdomain.com with your domain
+
+# code.yourdomain.com {
+#     reverse_proxy dev-server:8080
+# }
+
+# openclaw.yourdomain.com {
+#     reverse_proxy openclaw-gateway:18789
+# }
+
+# If you don't have a domain, use direct IP via ports:
+#   8080  → code-server
+#   18789 → openclaw gateway
+#   18790 → openclaw bridge
+# (Caddy doesn't need to do anything yet)
