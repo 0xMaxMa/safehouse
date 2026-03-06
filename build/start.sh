@@ -89,8 +89,4 @@ chmod 600 "$AUTH_KEYS"
 chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.ssh
 echo "✅ openclaw SSH key registered"
 
-# === Claude Code: auto-create claude-code tmux session ===
-su - ${DEV_USER} -c "tmux has-session -t claude-code 2>/dev/null || tmux new-session -d -s claude-code -x 220 -y 50"
-echo "✅ tmux session 'claude-code' ready"
-
 tail -f /dev/null
