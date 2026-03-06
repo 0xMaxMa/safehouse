@@ -10,20 +10,20 @@ help: ## Show this help
 # Stack
 # --------------------
 start: ## Start all services
-	docker-compose up -d
+	docker compose up -d
 
 stop: ## Stop and remove all containers
-	docker-compose down
+	docker compose down
 
 restart: ## Restart all containers
-	docker-compose restart
+	docker compose restart
 
 build: ## Rebuild image
-	docker-compose down
-	docker-compose build --no-cache
+	docker compose down
+	docker compose build --no-cache
 
 logs: ## Follow container logs
-	docker-compose logs -f
+	docker compose logs -f
 
 # --------------------
 # Maintenance
