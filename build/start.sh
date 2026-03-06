@@ -67,4 +67,30 @@ echo "  iPad / Browser → http://YOUR_SERVER_IP:${CODE_SERVER_PORT}"
 echo "  Password: ${CODE_SERVER_PASSWORD}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
+# === Claude Code: auto-generate SSH key for openclaw (first run) ===
+OPENCLAW_SSH_DIR="/home/${DEV_USER}/.openclaw-ssh"
+OPENCLAW_KEY="$OPENCLAW_SSH_DIR/id_ed25519"
+AUTH_KEYS="/home/${DEV_USER}/.ssh/authorized_keys"
+
+mkdir -p "$OPENCLAW_SSH_DIR"
+chown ${DEV_USER}:${DEV_USER} "$OPENCLAW_SSH_DIR"
+
+if [ ! -f "$OPENCLAW_KEY" ]; then
+    su - ${DEV_USER} -c "ssh-keygen -t ed25519 -f $OPENCLAW_KEY -N '' -C 'openclaw-gateway'"
+    echo "✅ SSH key generated for openclaw"
+fi
+
+# Register public key into authorized_keys
+mkdir -p /home/${DEV_USER}/.ssh
+chmod 700 /home/${DEV_USER}/.ssh
+grep -qF "$(cat ${OPENCLAW_KEY}.pub)" "$AUTH_KEYS" 2>/dev/null || \
+    cat "${OPENCLAW_KEY}.pub" >> "$AUTH_KEYS"
+chmod 600 "$AUTH_KEYS"
+chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.ssh
+echo "✅ openclaw SSH key registered"
+
+# === Claude Code: auto-create claude-code tmux session ===
+su - ${DEV_USER} -c "tmux has-session -t claude-code 2>/dev/null || tmux new-session -d -s claude-code -x 220 -y 50"
+echo "✅ tmux session 'claude-code' ready"
+
 tail -f /dev/null

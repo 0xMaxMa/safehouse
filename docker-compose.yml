@@ -18,7 +18,7 @@ services:
       - "${CODE_SERVER_PORT}:8080"    # iPad / Browser — code-server
       # Add more ports here if you want to expose additional services
       # For example, if you run a web server inside the container on port 3000
-      # - "3000:3000"          
+      - "3000:3000"          
     volumes:
       - ./projects:/home/${DEV_USER}/projects
       # Persist Claude Code auth and config
@@ -28,9 +28,11 @@ services:
       # Persist code-server data (settings, themes, extensions)
       - ${HOST_HOME}/code-server:/home/${DEV_USER}/.local/share/code-server
       # Tmux config from host
-      - ./data/tmux:/home/${DEV_USER}/.config/tmux
+      - ${HOST_HOME}/tmux:/home/${DEV_USER}/.config/tmux
       # Persist Docker login credentials
-      - ./data/docker-login:/home/${DEV_USER}/.docker
+      - ${HOST_HOME}/docker-login:/home/${DEV_USER}/.docker
+      # SSH keys for OpenClaw to access dev-server without password
+      - ${HOST_HOME}/.openclaw/ssh:/home/${DEV_USER}/.openclaw-ssh
     restart: unless-stopped
     networks:
       - devnet
@@ -45,10 +47,12 @@ services:
       CLAUDE_AI_SESSION_KEY: ${CLAUDE_AI_SESSION_KEY}
       CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY}
       CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE}
+      DEV_SERVER_HOST: dev-server
+      DEV_USER: ${DEV_USER:-dev}
     volumes:
       - ${HOST_HOME}/.openclaw/config:/home/node/.openclaw
       - ${HOST_HOME}/.openclaw/workspace:/home/node/.openclaw/workspace
-      - ./projects:/home/node/.openclaw/projects
+      - ${HOST_HOME}/.openclaw/ssh:/home/node/.ssh
     ports:
       - "${OPENCLAW_GATEWAY_PORT:-18789}:18789"
       - "${OPENCLAW_BRIDGE_PORT:-18790}:18790"

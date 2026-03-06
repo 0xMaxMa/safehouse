@@ -23,6 +23,23 @@ The dev-server comes with [Claude Code](https://github.com/anthropics/claude-cod
 ### Openclaw
 [Openclaw](https://openclaw.ai) is an open-source personal AI assistant that lets you interact with it through messaging apps like Telegram — delegate tasks from anywhere.
 
+**Example — Sending message to Openclaw to fix the bug:**
+
+> Hey
+>
+> From screenshot, the dashboard looks wrong, this morning's training was weight training, not running, so it should be blue 🔵 not 🟣.
+> And the training streak is now only 2 days instead of the expected 10 days.
+>
+> Check and send feedback to fix the bugs via ssh + tmux session = fix-bug-streak, and have claude code fix it.
+
+In-action: Openclaw will analyze and plan a prompt description, then SSH into dev-server, create a tmux session named `fix-bug-streak`, and send the prompt to Claude Code running inside it. 
+
+Note: You can SSH to watch the session live:
+
+```bash
+ssh dev@YOUR_SERVER_IP -p 2222   # then select tmux session: fix-bug-streak
+```
+
 ---
 
 ## Setup
