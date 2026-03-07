@@ -83,10 +83,11 @@ make start
 
 Open [http://localhost:18789/overview](http://localhost:18789/overview), enter the Gateway Token, and click **Connect**.
 
-If you see `disconnected (1008): pairing required`:
+If you see `disconnected (1008): pairing required`, approve the device request:
 
 ```bash
-make openclaw-fix-pairing
+make openclaw-devices-list                      # find the requestId
+make openclaw-devices-approve requestId=<id>    # approve it
 ```
 
 Then reconnect.
@@ -142,8 +143,10 @@ make update-password      # Change SSH + code-server password
 make clear-known-hosts    # Clear SSH known_hosts entry for dev-server
 make docker-builder-start # Start Docker-in-Docker builder
 make docker-builder-stop  # Stop Docker-in-Docker builder
-make openclaw-setup       # Onboard this machine to Openclaw
-make openclaw-fix-pairing # Fix Openclaw silent pairing error
+make openclaw-setup          # Onboard this machine to Openclaw
+make openclaw-fix-pairing    # Fix Openclaw silent pairing error
+make openclaw-devices-list   # List connected devices
+make openclaw-devices-approve requestId=<id>  # Approve a device request
 ```
 
 ---

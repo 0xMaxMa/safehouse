@@ -1,6 +1,7 @@
 .PHONY: help start stop restart build logs \
         update-password clear-known-hosts \
-        docker-builder-start openclaw-setup openclaw-fix-pairing
+        docker-builder-start openclaw-setup openclaw-fix-pairing \
+        openclaw-devices-list openclaw-devices-approve
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) \
@@ -47,7 +48,13 @@ docker-builder-stop: ## Stop the Docker-in-Docker builder container
 # Openclaw
 # --------------------
 openclaw-setup: ## Onboard this machine to Openclaw
-	./scripts/openclaw-setup.sh
+	docker compose run --rm openclaw-gateway node dist/index.js onboard --no-install-daemon
 
 openclaw-fix-pairing: ## Fix Openclaw silent pairing (pending.json)
 	./scripts/openclaw-fix-pairing.sh
+
+openclaw-devices-list: ## List connected Openclaw devices
+	docker exec openclaw-gateway node dist/index.js devices list
+
+openclaw-devices-approve: ## Approve a device request — usage: make openclaw-devices-approve requestId=<id>
+	docker exec openclaw-gateway node dist/index.js devices approve $(requestId)

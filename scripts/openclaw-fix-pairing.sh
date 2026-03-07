@@ -16,6 +16,10 @@ if [ ! -f "$FILE" ]; then
 fi
 
 # Replace "silent": false => "silent": true
-sed -i '' 's/"silent": false/"silent": true/g' "$FILE"
+if [ "$(uname)" = "Darwin" ]; then
+  sed -i '' 's/"silent": false/"silent": true/g' "$FILE"
+else
+  sed -i 's/"silent": false/"silent": true/g' "$FILE"
+fi
 
 echo "🔨 Fixed: $FILE"
