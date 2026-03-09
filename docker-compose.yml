@@ -16,9 +16,6 @@ services:
     ports:
       - "${SSH_PORT}:22"      # VS Code Desktop — Remote-SSH
       - "${CODE_SERVER_PORT}:8080"    # iPad / Browser — code-server
-      # Add more ports here if you want to expose additional services
-      # For example, if you run a web server inside the container on port 3000
-      - "3000:3000"
     volumes:
       - ${HOST_HOME}/${DEV_USER}:/home/${DEV_USER}
     restart: unless-stopped
