@@ -67,25 +67,23 @@ echo "  iPad / Browser → http://YOUR_SERVER_IP:${CODE_SERVER_PORT}"
 echo "  Password: ${CODE_SERVER_PASSWORD}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# === Claude Code: auto-generate SSH key for openclaw (first run) ===
-OPENCLAW_SSH_DIR="/home/${DEV_USER}/.openclaw-ssh"
-OPENCLAW_KEY="$OPENCLAW_SSH_DIR/id_ed25519"
+# Auto-generate SSH key for openclaw (stored in ${DEV_USER}/.ssh, shared via volume mount)
 AUTH_KEYS="/home/${DEV_USER}/.ssh/authorized_keys"
+OPENCLAW_KEY="/home/${DEV_USER}/.ssh/id_ed25519"
 
-mkdir -p "$OPENCLAW_SSH_DIR"
+mkdir -p /home/${DEV_USER}/.ssh
+chmod 700 /home/${DEV_USER}/.ssh
+chown ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.ssh
 
 if [ ! -f "$OPENCLAW_KEY" ]; then
     su - ${DEV_USER} -c "ssh-keygen -t ed25519 -f $OPENCLAW_KEY -N '' -C 'openclaw-gateway'"
     echo "✅ SSH key generated for openclaw"
 fi
 
-# Register public key into authorized_keys
-mkdir -p /home/${DEV_USER}/.ssh
-chmod 700 /home/${DEV_USER}/.ssh
 grep -qF "$(cat ${OPENCLAW_KEY}.pub)" "$AUTH_KEYS" 2>/dev/null || \
     cat "${OPENCLAW_KEY}.pub" >> "$AUTH_KEYS"
 chmod 600 "$AUTH_KEYS"
-chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.ssh
+chown ${DEV_USER}:${DEV_USER} "$AUTH_KEYS"
 echo "✅ openclaw SSH key registered"
 
 tail -f /dev/null

@@ -37,7 +37,7 @@ services:
     volumes:
       - ${HOST_HOME}/.openclaw/config:/home/node/.openclaw
       - ${HOST_HOME}/.openclaw/workspace:/home/node/.openclaw/workspace
-      - ${HOST_HOME}/.openclaw/ssh:/home/node/.ssh
+      - ${HOST_HOME}/${DEV_USER:-dev}/.ssh:/home/node/.ssh
     ports:
       - "${OPENCLAW_GATEWAY_PORT:-18789}:18789"
       - "${OPENCLAW_BRIDGE_PORT:-18790}:18790"
