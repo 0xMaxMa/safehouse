@@ -47,6 +47,13 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | d
 # Install code-server (iPad / browser access)
 RUN curl -fsSL https://code-server.dev/install.sh | sh
 
+# Install Cloudflare Tunnel
+RUN curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | gpg --dearmor -o /usr/share/keyrings/cloudflare-main.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main" | tee /etc/apt/sources.list.d/cloudflared.list \
+    && apt-get update \
+    && apt-get install -y cloudflared \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install Claude CLI
 RUN npm install -g @anthropic-ai/claude-code@latest
 
