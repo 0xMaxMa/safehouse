@@ -5,7 +5,7 @@ ARG DEV_USER_PASSWORD=changeme
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --fix-missing \
     openssh-server \
     curl \
     git \

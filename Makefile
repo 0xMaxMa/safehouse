@@ -61,3 +61,6 @@ openclaw-devices-list: ## List connected Openclaw devices
 
 openclaw-devices-approve: ## Approve a device request — usage: make openclaw-devices-approve requestId=<id>
 	docker exec openclaw-gateway node dist/index.js devices approve $(requestId)
+
+openclaw-cmd:
+        docker compose run --rm openclaw-gateway node dist/index.js $(cmd)
