@@ -1,5 +1,5 @@
 .PHONY: help start stop restart build logs \
-        update-password clear-known-hosts \
+        update-password clear-known-hosts fix-data-permission \
         docker-builder-start openclaw-setup openclaw-fix-pairing \
         openclaw-devices-list openclaw-devices-approve
 
@@ -34,6 +34,9 @@ update-password: ## Update SSH + code-server password
 
 clear-known-hosts: ## Clear local SSH known_hosts entry for dev-server
 	./scripts/clear_known_hosts.sh
+
+fix-data-permission: ## Create dev user and fix ./data ownership
+	sudo ./scripts/fix-data-permission.sh
 
 # --------------------
 # Docker Builder (DinD)

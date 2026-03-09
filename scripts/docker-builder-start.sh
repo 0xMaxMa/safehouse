@@ -7,7 +7,10 @@ cd "$ROOT_DIR"
 
 # Load env
 if [ -f .env ]; then
-  export $(grep -v '^#' .env | xargs)
+  set -a
+  # shellcheck source=.env
+  source .env
+  set +a
 fi
 
 # Ensure the shared devnet network exists (created by main docker-compose)

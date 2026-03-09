@@ -61,15 +61,10 @@ RUN mkdir /var/run/sshd \
     && sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin no/' /etc/ssh/sshd_config \
     && echo "AllowUsers ${DEV_USER}" >> /etc/ssh/sshd_config
 
-# code-server config
-RUN mkdir -p /home/${DEV_USER}/.config/code-server \
-    && chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}
-
-COPY code-server-config.yaml /home/${DEV_USER}/.config/code-server/config.yaml
-RUN chown ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.config/code-server/config.yaml
-
-COPY .bashrc /home/${DEV_USER}/.bashrc
-RUN chown ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.bashrc
+# Store templates in /etc so start.sh can seed them on first run
+# (home dir is volume-mounted, so nothing copied there will persist)
+COPY code-server-config.yaml /etc/code-server-config.yaml
+COPY .bashrc /etc/safehouse-bashrc
 
 COPY start.sh /start.sh
 RUN chmod +x /start.sh

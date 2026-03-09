@@ -18,12 +18,14 @@ echo "${DEV_USER}:${CODE_SERVER_PASSWORD}" | chpasswd
 service ssh start
 echo "✅ SSH ready — port 22 (mapped to ${SSH_PORT} on host)"
 
-# Fix permissions
-mkdir -p /home/${DEV_USER}/.claude/debug
-chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/projects 2>/dev/null || true
-chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.claude 2>/dev/null || true
+# Fix ownership of volume-mounted home dir
+chmod 755 /home/${DEV_USER}
+chown ${DEV_USER}:${DEV_USER} /home/${DEV_USER}
+for dir in .claude .config .local .docker .ssh .openclaw-ssh; do
+    chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/${dir} 2>/dev/null || true
+done
 
-# Symlink tmux config from mounted volume
+# Symlink tmux config if present
 TMUX_CONF=/home/${DEV_USER}/.config/tmux/.tmux.conf
 TMUX_LINK=/home/${DEV_USER}/.tmux.conf
 if [ -f "$TMUX_CONF" ] && [ ! -L "$TMUX_LINK" ]; then
@@ -31,32 +33,23 @@ if [ -f "$TMUX_CONF" ] && [ ! -L "$TMUX_LINK" ]; then
     chown -h ${DEV_USER}:${DEV_USER} "$TMUX_LINK"
 fi
 
-# Ensure .claude.json persists via symlink into the mounted volume
-CLAUDE_CONFIG=/home/${DEV_USER}/.claude/config.json
-CLAUDE_JSON=/home/${DEV_USER}/.claude.json
+# Seed .bashrc if not present on volume (first run)
+BASHRC=/home/${DEV_USER}/.bashrc
+[ ! -f "$BASHRC" ] && cp /etc/safehouse-bashrc "$BASHRC" && chown ${DEV_USER}:${DEV_USER} "$BASHRC"
 
-# Migrate standalone file into the volume if present
-if [ -f "$CLAUDE_JSON" ] && [ ! -L "$CLAUDE_JSON" ]; then
-    mv "$CLAUDE_JSON" "$CLAUDE_CONFIG"
-fi
+# Ensure code-server config exists (volume mount wipes Dockerfile COPY)
+CODE_SERVER_CONFIG=/home/${DEV_USER}/.config/code-server/config.yaml
+mkdir -p "$(dirname $CODE_SERVER_CONFIG)"
+[ ! -f "$CODE_SERVER_CONFIG" ] && cp /etc/code-server-config.yaml "$CODE_SERVER_CONFIG"
+chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.config/code-server
 
-# Create symlink if missing
-if [ ! -L "$CLAUDE_JSON" ]; then
-    ln -sf "$CLAUDE_CONFIG" "$CLAUDE_JSON"
-    chown -h ${DEV_USER}:${DEV_USER} "$CLAUDE_JSON"
-fi
-
-# Fix permissions on config
-if [ -f "$CLAUDE_CONFIG" ]; then
-    chmod 600 "$CLAUDE_CONFIG"
-    chown ${DEV_USER}:${DEV_USER} "$CLAUDE_CONFIG"
-fi
-chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.config/gh 2>/dev/null || true
-chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.local/share/code-server 2>/dev/null || true
+# Ensure projects dir exists in home
+mkdir -p /home/${DEV_USER}/projects
+chown ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/projects
 
 # code-server (iPad / browser)
 echo "✅ code-server ready — port ${CODE_SERVER_PORT}"
-su - ${DEV_USER} -c "PASSWORD='${CODE_SERVER_PASSWORD}' code-server --config /home/${DEV_USER}/.config/code-server/config.yaml" &
+su - ${DEV_USER} -c "PASSWORD='${CODE_SERVER_PASSWORD}' code-server --config ${CODE_SERVER_CONFIG}" &
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -73,7 +66,6 @@ OPENCLAW_KEY="$OPENCLAW_SSH_DIR/id_ed25519"
 AUTH_KEYS="/home/${DEV_USER}/.ssh/authorized_keys"
 
 mkdir -p "$OPENCLAW_SSH_DIR"
-chown ${DEV_USER}:${DEV_USER} "$OPENCLAW_SSH_DIR"
 
 if [ ! -f "$OPENCLAW_KEY" ]; then
     su - ${DEV_USER} -c "ssh-keygen -t ed25519 -f $OPENCLAW_KEY -N '' -C 'openclaw-gateway'"
