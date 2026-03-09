@@ -37,6 +37,13 @@ fi
 BASHRC=/home/${DEV_USER}/.bashrc
 [ ! -f "$BASHRC" ] && cp /etc/safehouse-bashrc "$BASHRC" && chown ${DEV_USER}:${DEV_USER} "$BASHRC"
 
+# Ensure .bash_profile sources .bashrc (SSH login shells don't load .bashrc directly)
+BASH_PROFILE=/home/${DEV_USER}/.bash_profile
+if [ ! -f "$BASH_PROFILE" ]; then
+    echo '[ -f ~/.bashrc ] && . ~/.bashrc' > "$BASH_PROFILE"
+    chown ${DEV_USER}:${DEV_USER} "$BASH_PROFILE"
+fi
+
 # Ensure code-server config exists (volume mount wipes Dockerfile COPY)
 CODE_SERVER_CONFIG=/home/${DEV_USER}/.config/code-server/config.yaml
 mkdir -p "$(dirname $CODE_SERVER_CONFIG)"
