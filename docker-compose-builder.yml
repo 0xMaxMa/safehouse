@@ -10,11 +10,11 @@ services:
       - ./projects:/workspace
     restart: unless-stopped
     networks:
-      - devnet
+      - dev_net
 
 volumes:
   docker-builder-data:
 
 networks:
-  devnet:
-    external: true
+  dev_net:
+    name: dev_net

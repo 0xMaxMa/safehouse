@@ -20,7 +20,8 @@ services:
       - ${HOST_HOME}/${DEV_USER}:/home/${DEV_USER}
     restart: unless-stopped
     networks:
-      - devnet
+      - dev_net
+      - caddy_net
 
   openclaw-gateway:
     image: alpine/openclaw:latest
@@ -54,27 +55,11 @@ services:
         "18789",
       ]
     networks:
-      - devnet
-
-  caddy:
-    image: caddy:alpine
-    container_name: caddy
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
-    restart: unless-stopped
-    networks:
-      - devnet
-
-volumes:
-  caddy_data:
-  caddy_config:
+      - dev_net
+      - caddy_net
 
 networks:
-  devnet:
-    name: devnet
-    driver: bridge
+  dev_net:
+    name: dev_net
+  caddy_net:
+    name: caddy_net
