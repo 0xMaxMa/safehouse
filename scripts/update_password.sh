@@ -46,10 +46,14 @@ echo ""
 DEV_USER=$(grep -E '^DEV_USER=' "$ENV_FILE" | cut -d= -f2 | tr -d '[:space:]')
 DEV_USER="${DEV_USER:-dev}"
 
+# Load DEV_SERVER_CONTAINER
+DEV_SERVER_CONTAINER=$(grep -E '^DEV_SERVER_CONTAINER=' "$ENV_FILE" | cut -d= -f2 | tr -d '[:space:]')
+DEV_SERVER_CONTAINER="${DEV_SERVER_CONTAINER:-dev-server}"
+
 # Restart container so CODE_SERVER_PASSWORD env var picks up new value from .env
 # start.sh will also run chpasswd on startup, so SSH password is synced automatically
-echo "Restarting dev-server..."
-docker compose up -d dev-server
+echo "Restarting ${DEV_SERVER_CONTAINER}..."
+docker compose up -d "${DEV_SERVER_CONTAINER}"
 
 echo ""
 echo "✅ Done. Password updated."

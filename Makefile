@@ -1,3 +1,7 @@
+-include .env
+DEV_SERVER_CONTAINER ?= dev-server
+OPENCLAW_GATEWAY_CONTAINER ?= openclaw-gateway
+
 .PHONY: help start stop restart build logs \
         update-password clear-known-hosts fix-data-permission \
         docker-builder-start openclaw-setup openclaw-fix-pairing \
@@ -51,16 +55,16 @@ docker-builder-stop: ## Stop the Docker-in-Docker builder container
 # Openclaw
 # --------------------
 openclaw-setup: ## Onboard this machine to Openclaw
-	docker compose run --rm openclaw-gateway node dist/index.js onboard --no-install-daemon
+	docker compose run --rm $(OPENCLAW_GATEWAY_CONTAINER) node dist/index.js onboard --no-install-daemon
 
 openclaw-fix-pairing: ## Fix Openclaw silent pairing (pending.json)
 	./scripts/openclaw-fix-pairing.sh
 
 openclaw-devices-list: ## List connected Openclaw devices
-	docker exec openclaw-gateway node dist/index.js devices list
+	docker exec $(OPENCLAW_GATEWAY_CONTAINER) node dist/index.js devices list
 
 openclaw-devices-approve: ## Approve a device request — usage: make openclaw-devices-approve requestId=<id>
-	docker exec openclaw-gateway node dist/index.js devices approve $(requestId)
+	docker exec $(OPENCLAW_GATEWAY_CONTAINER) node dist/index.js devices approve $(requestId)
 
 openclaw-cmd: ## Run an Openclaw CLI command — usage: make openclaw-cmd cmd="<command>"
-	docker compose run --rm openclaw-gateway node dist/index.js $(cmd)
+	docker compose run --rm $(OPENCLAW_GATEWAY_CONTAINER) node dist/index.js $(cmd)
