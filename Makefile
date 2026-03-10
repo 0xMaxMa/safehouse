@@ -41,7 +41,7 @@ update-password: ## Update SSH + code-server password
 clear-known-hosts: ## Clear local SSH known_hosts entry for dev-server
 	./scripts/clear_known_hosts.sh
 
-fix-data-permission: ## Create dev user and fix ./data ownership
+fix-data-permission: ## Fix ./data ownership to UID 1000
 	sudo ./scripts/fix-data-permission.sh
 
 # --------------------

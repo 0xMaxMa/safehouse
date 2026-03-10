@@ -57,8 +57,9 @@ RUN curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | gpg --dearmor -o
 # Install Claude CLI
 RUN npm install -g @anthropic-ai/claude-code@latest
 
-# Create dev user
-RUN useradd -m -s /bin/bash ${DEV_USER} \
+# Create dev user (remove pre-existing ubuntu user to free UID 1000)
+RUN userdel -r ubuntu 2>/dev/null || true \
+    && useradd -m -s /bin/bash --uid 1000 ${DEV_USER} \
     && echo "${DEV_USER}:${DEV_USER_PASSWORD}" | chpasswd \
     && echo "${DEV_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 

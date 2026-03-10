@@ -86,7 +86,10 @@ if [ ! -f "$OPENCLAW_KEY" ]; then
         cat "${OPENCLAW_KEY}.pub" >> "$AUTH_KEYS"
     chmod 600 "$AUTH_KEYS"
     chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.ssh
+
+    # Make sure openclaw-gateway can access the private key
     chown -R 1000:1000 "$OPENCLAW_SSH_DIR"
+
     echo "✅ openclaw SSH key registered"
 fi
 
