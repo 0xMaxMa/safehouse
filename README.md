@@ -141,12 +141,15 @@ make build                # Rebuild dev-server image (no cache)
 make logs                 # Follow container logs
 make update-password      # Change SSH + code-server password
 make clear-known-hosts    # Clear SSH known_hosts entry for dev-server
+make fix-data-permission  # Fix ./data ownership to UID 1000
 make docker-builder-start # Start Docker-in-Docker builder
 make docker-builder-stop  # Stop Docker-in-Docker builder
-make openclaw-setup          # Onboard this machine to Openclaw
-make openclaw-fix-pairing    # Fix Openclaw silent pairing error
-make openclaw-devices-list   # List connected devices
+make caddy-start          # Start Caddy reverse proxy
+make caddy-stop           # Stop Caddy reverse proxy
+make openclaw-setup                           # Onboard this machine to Openclaw
+make openclaw-devices-list                    # List connected devices
 make openclaw-devices-approve requestId=<id>  # Approve a device request
+make openclaw-cmd cmd="<command>"             # Run an Openclaw CLI command
 ```
 
 ---
@@ -165,18 +168,28 @@ make docker-builder-start
 
 ## Persistence
 
-All data is stored in `./data/` on the host:
+The entire home directory of `dev` is volume-mounted from the host:
 
-| Path | Contents |
-|------|----------|
-| `data/.claude/` | Claude Code auth and config |
-| `data/github/gh/` | GitHub CLI tokens |
-| `data/code-server/` | VS Code settings and extensions |
-| `data/.openclaw/` | Openclaw config and workspace |
-| `data/tmux/` | tmux config |
-| `data/docker-login/` | Docker Hub credentials |
+```
+HOST_HOME/dev/  →  /home/dev/  (inside container)
+```
 
-Projects are stored in `./projects/`, mounted to `/home/dev/projects` inside the container.
+| Host path | Contents |
+|-----------|----------|
+| `data/dev/.claude/` | Claude Code auth and config |
+| `data/dev/.config/code-server/` | VS Code settings and extensions |
+| `data/dev/.config/tmux/` | tmux config |
+| `data/dev/.docker/` | Docker Hub credentials |
+| `data/dev/.ssh/` | SSH keys and authorized_keys |
+| `data/dev/.openclaw-ssh/` | Openclaw SSH key pair |
+| `data/dev/projects/` | Your projects |
+
+Openclaw config is stored separately:
+
+| Host path | Contents |
+|-----------|----------|
+| `data/.openclaw/config/` | Openclaw config |
+| `data/.openclaw/workspace/` | Openclaw workspace |
 
 ---
 
@@ -197,7 +210,7 @@ openclaw.yourdomain.com {
 Then run:
 
 ```bash
-docker compose restart caddy
+make caddy-start
 ```
 
 TLS certificates are provisioned automatically via Let's Encrypt.
