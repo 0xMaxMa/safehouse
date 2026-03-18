@@ -30,7 +30,7 @@ Example:
 
 ```bash
 # Connect
-ssh -i /home/node/.ssh/id_ed25519 -p 2222 dev@<dev-server>
+ssh -i /home/node/.ssh/id_ed25519 -p 22 dev@<dev-server>
 
 # tmux: attach existing or create new
 tmux attach -t <session-name> 2>/dev/null || tmux new-session -d -s <session-name>
