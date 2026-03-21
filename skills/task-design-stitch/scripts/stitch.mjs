@@ -32,6 +32,15 @@ function extractScreenId(screenData) {
   return screenData.id || screenData.name?.split("/screens/")?.[1];
 }
 
+/** Append =s0 to lh3.googleusercontent.com URLs for full resolution */
+function hiResImageUrl(url) {
+  if (!url) return url;
+  if (url.includes("lh3.googleusercontent.com") && !url.includes("=s")) {
+    return url + "=s0";
+  }
+  return url;
+}
+
 async function fetchUrl(url) {
   return new Promise((resolve, reject) => {
     https.get(url, res => {
@@ -87,7 +96,7 @@ async function generateScreen(projectId, prompt, screenName) {
     name: screenName || "generated",
     projectId,
     htmlUrl: detail.htmlCode?.downloadUrl || screenData.htmlCode?.downloadUrl || null,
-    imageUrl: detail.screenshot?.downloadUrl || screenData.screenshot?.downloadUrl || null,
+    imageUrl: hiResImageUrl(detail.screenshot?.downloadUrl || screenData.screenshot?.downloadUrl || null),
     viewUrl: `https://stitch.withgoogle.com/project/${projectId}`
   };
   console.log(JSON.stringify(result, null, 2));
@@ -112,7 +121,7 @@ async function editScreen(projectId, screenId, prompt) {
     screenId: newScreenId,
     projectId,
     htmlUrl: detail.htmlCode?.downloadUrl || null,
-    imageUrl: detail.screenshot?.downloadUrl || null,
+    imageUrl: hiResImageUrl(detail.screenshot?.downloadUrl || null),
   };
   console.log(JSON.stringify(result, null, 2));
 }
@@ -127,7 +136,7 @@ async function getScreen(projectId, screenId) {
     screenId,
     projectId,
     htmlUrl: raw.htmlCode?.downloadUrl || null,
-    imageUrl: raw.screenshot?.downloadUrl || null,
+    imageUrl: hiResImageUrl(raw.screenshot?.downloadUrl || null),
   }, null, 2));
 }
 
@@ -149,7 +158,7 @@ async function generateVariants(projectId, screenId) {
     screenId: newScreenId,
     projectId,
     htmlUrl: detail.htmlCode?.downloadUrl || null,
-    imageUrl: detail.screenshot?.downloadUrl || null,
+    imageUrl: hiResImageUrl(detail.screenshot?.downloadUrl || null),
   }, null, 2));
 }
 
