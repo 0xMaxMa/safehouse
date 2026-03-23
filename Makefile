@@ -1,6 +1,5 @@
 -include .env
 DEV_SERVER_CONTAINER ?= dev-server
-OPENCLAW_GATEWAY_CONTAINER ?= openclaw-gateway
 
 .PHONY: help start stop restart build logs \
         update-password clear-known-hosts fix-data-permission \
@@ -66,13 +65,13 @@ caddy-stop: ## Stop the Caddy reverse proxy
 # Openclaw
 # --------------------
 openclaw-setup: ## Onboard this machine to Openclaw
-	docker compose run --rm openclaw-gateway node dist/index.js onboard --no-install-daemon
+	docker exec -it -u $(DEV_USER) $(DEV_SERVER_CONTAINER) openclaw onboard --no-install-daemon
 
 openclaw-devices-list: ## List connected Openclaw devices
-	docker exec $(OPENCLAW_GATEWAY_CONTAINER) node dist/index.js devices list
+	docker exec -u $(DEV_USER) $(DEV_SERVER_CONTAINER) openclaw devices list
 
 openclaw-devices-approve: ## Approve a device request — usage: make openclaw-devices-approve requestId=<id>
-	docker exec $(OPENCLAW_GATEWAY_CONTAINER) node dist/index.js devices approve $(requestId)
+	docker exec -u $(DEV_USER) $(DEV_SERVER_CONTAINER) openclaw devices approve $(requestId)
 
 openclaw-cmd: ## Run an Openclaw CLI command — usage: make openclaw-cmd cmd="<command>"
-	docker compose run --rm openclaw-gateway node dist/index.js $(cmd)
+	docker exec -u $(DEV_USER) $(DEV_SERVER_CONTAINER) openclaw $(cmd)

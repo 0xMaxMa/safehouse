@@ -54,8 +54,8 @@ RUN curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | gpg --dearmor -o
     && apt-get install -y cloudflared \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Claude CLI
-RUN npm install -g @anthropic-ai/claude-code@latest
+# Install Claude CLI + Openclaw
+RUN npm install -g @anthropic-ai/claude-code@latest openclaw@latest
 
 # Create dev user (remove pre-existing ubuntu user to free UID 1000)
 RUN userdel -r ubuntu 2>/dev/null || true \
@@ -77,6 +77,6 @@ COPY .bashrc /etc/safehouse-bashrc
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
-EXPOSE 22 8080
+EXPOSE 22 8080 18789 18790
 
 CMD ["/start.sh"]

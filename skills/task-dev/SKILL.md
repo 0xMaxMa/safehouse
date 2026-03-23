@@ -1,9 +1,9 @@
 ---
 name: task-dev
-description: Develop, fix bugs, or add features to a project via SSH + tmux + Claude Code on a remote dev server. Use when asked to fix a bug, implement a feature, or make code changes on a dev server. Triggers on phrases like "fix bug", "implement", "develop", "deploy", or when the user wants code changes made on a remote server.
+description: Develop, fix bugs, or add features to a project via tmux + Claude Code on a dev server. Use when asked to fix a bug, implement a feature, or make code changes on a dev server. Triggers on phrases like "fix bug", "implement", "develop", "deploy", or when the user wants code changes made on a remote server.
 ---
 
-# Task Dev — SSH + tmux + Claude Code Workflow
+# Task Dev — tmux + Claude Code Workflow
 
 ## Prerequisites (resolve before starting)
 
@@ -11,7 +11,6 @@ description: Develop, fix bugs, or add features to a project via SSH + tmux + Cl
 
 1. **Project name** — If not specified, ask: "What is the project name?" then save to memory
 2. **Session name** — If not specified, infer from task context (e.g. `fixbug-dot-color`, `feat-privacy-page`). Tell the user: "Working in tmux session: `<name>`". **Do NOT save to memory** — session name is task-specific, create a new one each time
-3. **Dev server hostname** — Check memory first. If not found, ask: "What is the dev server hostname? e.g. xxx.dev-server" then save to memory after successful connection
 
 ## Step 1 — Plan & Confirm
 
@@ -26,17 +25,12 @@ Example:
 
 **Do not proceed until user confirms.**
 
-## Step 2 — SSH & tmux
+## Step 2 — tmux
 
 ```bash
-# Connect
-ssh -i /home/node/.ssh/id_ed25519 -p 22 dev@<dev-server>
-
 # tmux: attach existing or create new
 tmux attach -t <session-name> 2>/dev/null || tmux new-session -d -s <session-name>
 ```
-
-If SSH fails, ask the user for the correct hostname. Save successful hostname to memory.
 
 ## Step 3 — Launch Claude Code
 
@@ -63,7 +57,7 @@ tmux send-keys -t <session-name> '<full task prompt>' C-m
 
 Monitor progress by polling every 30–60s:
 ```bash
-ssh ... "tmux capture-pane -t <session-name> -p -S -20"
+tmux capture-pane -t <session-name> -p -S -20
 ```
 
 If Claude Code gets stuck waiting for approval, use the shell window to run commands directly.
@@ -123,7 +117,6 @@ Verify:
 ## Memory
 
 Save to memory after first successful run:
-- Dev server hostname
 - Project name → path mapping (e.g. `running-coach` → `~/projects/running-coach`)
 - Deploy URL
 
@@ -133,7 +126,6 @@ Save to memory after first successful run:
 
 | Problem | Fix |
 |---------|-----|
-| SSH connection refused | Ask user for correct hostname/port |
 | Claude Code keeps asking approval | Open `tmux new-window` shell, run commands directly |
 | Build fails: Type error | Fix type mismatch before deploying |
 | Tests fail after code change | Fix root cause, don't skip tests |
