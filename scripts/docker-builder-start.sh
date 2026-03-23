@@ -14,8 +14,8 @@ if [ -f .env ]; then
 fi
 
 # Ensure the shared devnet network exists (created by main docker-compose)
-if ! docker network inspect devnet &>/dev/null; then
-  echo "Network 'devnet' not found. Start the main stack first:"
+if ! docker network inspect dev_net &>/dev/null; then
+  echo "Network 'dev_net' not found. Start the main stack first:"
   echo "  docker compose up -d"
   exit 1
 fi

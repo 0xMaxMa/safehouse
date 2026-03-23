@@ -6,7 +6,7 @@
 # }
 
 # openclaw.yourdomain.com {
-#     reverse_proxy openclaw-gateway:18789
+#     reverse_proxy dev-server:18789
 # }
 
 # If you don't have a domain, use direct IP via ports:

@@ -8,8 +8,7 @@ A Docker Compose suite for personal AI-driven development on your server, access
 
 | Service | Description |
 |---------|-------------|
-| `dev-server` | Ubuntu 24.04 — SSH + code-server + Claude Code + tmux + GitHub CLI + Docker CLI |
-| `openclaw-gateway` | Openclaw gateway for Claude web access |
+| `dev-server` | Ubuntu 24.04 — SSH + code-server + Claude Code + Openclaw + tmux + GitHub CLI + Docker CLI |
 | `caddy` | Reverse proxy with automatic HTTPS (optional) |
 | `docker-builder` | Docker-in-Docker for building images inside dev-server (optional) |
 
@@ -32,7 +31,7 @@ The dev-server comes with [Claude Code](https://github.com/anthropics/claude-cod
 >
 > Check and send feedback to fix the bugs via ssh + tmux session = fix-bug-streak, and have claude code fix it.
 
-In-action: Openclaw will analyze and plan a prompt description, then SSH into dev-server, create a tmux session named `fix-bug-streak`, and send the prompt to Claude Code running inside it. 
+In-action: Openclaw will analyze and plan a prompt description, create a tmux session named `fix-bug-streak`, and send the prompt to Claude Code running inside it.
 
 Note: You can SSH to watch the session live:
 
@@ -141,7 +140,6 @@ make build                # Rebuild dev-server image (no cache)
 make logs                 # Follow container logs
 make update-password      # Change SSH + code-server password
 make clear-known-hosts    # Clear SSH known_hosts entry for dev-server
-make fix-data-permission  # Fix ./data ownership to UID 1000
 make docker-builder-start # Start Docker-in-Docker builder
 make docker-builder-stop  # Stop Docker-in-Docker builder
 make caddy-start          # Start Caddy reverse proxy
@@ -168,28 +166,22 @@ make docker-builder-start
 
 ## Persistence
 
-The entire home directory of `dev` is volume-mounted from the host:
+The entire `HOST_HOME` directory is volume-mounted as the dev user's home:
 
 ```
-HOST_HOME/dev/  →  /home/dev/  (inside container)
+HOST_HOME/  →  /home/dev/  (inside container)
 ```
 
 | Host path | Contents |
 |-----------|----------|
-| `data/dev/.claude/` | Claude Code auth and config |
-| `data/dev/.config/code-server/` | VS Code settings and extensions |
-| `data/dev/.config/tmux/` | tmux config |
-| `data/dev/.docker/` | Docker Hub credentials |
-| `data/dev/.ssh/` | SSH keys and authorized_keys |
-| `data/dev/.openclaw-ssh/` | Openclaw SSH key pair |
-| `data/dev/projects/` | Your projects |
-
-Openclaw config is stored separately:
-
-| Host path | Contents |
-|-----------|----------|
+| `data/.claude/` | Claude Code auth and config |
+| `data/.config/code-server/` | VS Code settings and extensions |
+| `data/.config/tmux/` | tmux config |
+| `data/.docker/` | Docker Hub credentials |
+| `data/.ssh/` | SSH keys and authorized_keys |
 | `data/.openclaw/config/` | Openclaw config |
 | `data/.openclaw/workspace/` | Openclaw workspace |
+| `data/projects/` | Your projects |
 
 ---
 
@@ -203,7 +195,7 @@ code.yourdomain.com {
 }
 
 openclaw.yourdomain.com {
-    reverse_proxy openclaw-gateway:18789
+    reverse_proxy dev-server:18789
 }
 ```
 
