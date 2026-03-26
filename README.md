@@ -128,6 +128,12 @@ Select tmux session  (↑↓ move · Enter select · d delete)
     [+ new session]
 ```
 
+To re-open the picker at any time (inside or outside tmux):
+
+```bash
+tmux-select   # or ts
+```
+
 ---
 
 ## Makefile commands
