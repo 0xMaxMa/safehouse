@@ -2,7 +2,7 @@
 DEV_SERVER_CONTAINER ?= dev-server
 
 .PHONY: help start stop restart build logs \
-        update-password clear-known-hosts fix-data-permission \
+        update-password update-startup clear-known-hosts fix-data-permission \
         docker-builder-start docker-builder-stop \
         caddy-start caddy-stop \
         openclaw-setup openclaw-fix-pairing \
@@ -34,6 +34,10 @@ logs: ## Follow container logs
 # --------------------
 # Maintenance
 # --------------------
+update-startup: ## Update start.sh + .bashrc without rebuilding image
+	docker compose down
+	cp build/.bashrc $(HOST_HOME)/.bashrc
+
 update-password: ## Update SSH + code-server password
 	./scripts/update_password.sh
 

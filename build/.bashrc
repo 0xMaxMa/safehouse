@@ -19,11 +19,33 @@ _tmux_pick() {
         done
     }
 
+    _refresh_sessions() {
+        local old_sel="${sessions[$sel]:-}"
+        sessions=()
+        mapfile -t sessions < <(tmux list-sessions -F "#S" 2>/dev/null)
+        sessions+=("[+ new session]")
+        total=${#sessions[@]}
+        # preserve cursor on same session name
+        if [ -n "$old_sel" ]; then
+            for i in "${!sessions[@]}"; do
+                [[ "${sessions[$i]}" == "$old_sel" ]] && sel=$i && break
+            done
+        fi
+        ((sel >= total)) && sel=$((total - 1))
+    }
+
     tput civis >/dev/tty
     _draw
 
     while true; do
-        IFS= read -rsn1 key </dev/tty
+        IFS= read -rsn1 -t 2 key </dev/tty
+        local rc=$?
+        if [[ $rc -gt 128 ]]; then
+            # read timed out — refresh list
+            _refresh_sessions
+            _draw
+            continue
+        fi
         if [[ $key == $'\x1b' ]]; then
             read -rsn2 -t 0.1 seq </dev/tty
             case $seq in

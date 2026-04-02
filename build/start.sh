@@ -40,9 +40,9 @@ if [ -f "$TMUX_CONF" ] && [ ! -L "$TMUX_LINK" ]; then
     chown -h ${DEV_USER}:${DEV_USER} "$TMUX_LINK"
 fi
 
-# Seed .bashrc if not present on volume (first run)
+# Always update .bashrc from template (picks up changes on rebuild)
 BASHRC=/home/${DEV_USER}/.bashrc
-[ ! -f "$BASHRC" ] && cp /etc/safehouse-bashrc "$BASHRC" && chown ${DEV_USER}:${DEV_USER} "$BASHRC"
+cp /etc/safehouse-bashrc "$BASHRC" && chown ${DEV_USER}:${DEV_USER} "$BASHRC"
 
 # Ensure .bash_profile sources .bashrc (SSH login shells don't load .bashrc directly)
 BASH_PROFILE=/home/${DEV_USER}/.bash_profile

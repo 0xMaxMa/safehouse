@@ -35,7 +35,9 @@ tmux attach -t <session-name> 2>/dev/null || tmux new-session -d -s <session-nam
 ## Step 3 — Launch Claude Code
 
 ```bash
-tmux send-keys -t <session-name> 'cd ~/projects/<project> && claude --dangerously-skip-permissions' C-m
+# IMPORTANT: always send the command text and Enter separately to avoid Enter being swallowed
+tmux send-keys -t <session-name> 'cd ~/projects/<project> && claude --dangerously-skip-permissions'
+tmux send-keys -t <session-name> Enter
 ```
 
 Wait ~12s for Claude Code to load, then verify it's ready by capturing pane output.
@@ -52,7 +54,9 @@ Send the confirmed plan from Step 1 as a single prompt. Include:
 - "Write unit tests, wire function into component, run tests, fix until passing"
 
 ```bash
-tmux send-keys -t <session-name> '<full task prompt>' C-m
+# IMPORTANT: always send the command text and Enter separately
+tmux send-keys -t <session-name> '<full task prompt>'
+tmux send-keys -t <session-name> Enter
 ```
 
 Monitor progress by polling every 30–60s:
