@@ -57,6 +57,12 @@ mkdir -p "$(dirname $CODE_SERVER_CONFIG)"
 [ ! -f "$CODE_SERVER_CONFIG" ] && cp /etc/code-server-config.yaml "$CODE_SERVER_CONFIG"
 chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.config/code-server
 
+# Ensure code-server settings exist (terminal font fix for iPad)
+CODE_SERVER_SETTINGS=/home/${DEV_USER}/.local/share/code-server/User/settings.json
+mkdir -p "$(dirname $CODE_SERVER_SETTINGS)"
+[ ! -f "$CODE_SERVER_SETTINGS" ] && cp /etc/code-server-settings.json "$CODE_SERVER_SETTINGS"
+chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.local/share/code-server
+
 # Ensure projects dir exists in home
 mkdir -p /home/${DEV_USER}/projects
 chown ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/projects

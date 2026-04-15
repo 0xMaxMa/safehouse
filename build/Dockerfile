@@ -72,6 +72,7 @@ RUN mkdir /var/run/sshd \
 # Store templates in /etc so start.sh can seed them on first run
 # (home dir is volume-mounted, so nothing copied there will persist)
 COPY code-server-config.yaml /etc/code-server-config.yaml
+COPY code-server-settings.json /etc/code-server-settings.json
 COPY .bashrc /etc/safehouse-bashrc
 
 COPY start.sh /start.sh
