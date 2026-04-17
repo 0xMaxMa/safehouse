@@ -1,136 +1,74 @@
 ---
 name: task-dev
-description: Develop, fix bugs, or add features to a project via tmux + Claude Code on a dev server. Use when asked to fix a bug, implement a feature, or make code changes on a dev server. Triggers on phrases like "fix bug", "implement", "develop", "deploy", or when the user wants code changes made on a remote server.
+description: Implement a planning document end-to-end — branch, code, tests, PR. Use when the user asks to implement a planning-xxx.md file.
+user-invocable: true
 ---
 
-# Task Dev — tmux + Claude Code Workflow
+# /task-dev — Implement a planning document
 
-## Prerequisites (resolve before starting)
+Reference: `planning-xxx-xxx.md` as specified by the user.
 
-**Collect missing info before proceeding:**
+Follow these steps in order. Report progress at each step before continuing.
 
-1. **Project name** — If not specified, ask: "What is the project name?" then save to memory
-2. **Session name** — If not specified, infer from task context (e.g. `fixbug-dot-color`, `feat-privacy-page`). Tell the user: "Working in tmux session: `<name>`". **Do NOT save to memory** — session name is task-specific, create a new one each time
+---
 
-## Step 1 — Plan & Confirm
+## Step 1 — Prepare branch
 
-Restate the task clearly in bullet points. Ask the user to confirm or correct before proceeding.
-
-Example:
-> What will be done:
-> - Fix dot color logic in `app/(dashboard)/page.tsx`
-> - Condition: Strength + no activity + day has passed → 🔴
->
-> Is this correct?
-
-**Do not proceed until user confirms.**
-
-## Step 2 — tmux
+- If there is already a working branch, **ask the user first**: reuse it or create a new one?
+- Otherwise create a new branch from latest `main`:
 
 ```bash
-# tmux: attach existing or create new
-tmux attach -t <session-name> 2>/dev/null || tmux new-session -d -s <session-name>
+git checkout main
+git pull origin main
+git checkout -b <branch-name>    # e.g. feat/xxx, fix/xxx
 ```
 
-## Step 3 — Launch Claude Code
+---
 
-```bash
-# IMPORTANT: always send the command text and Enter separately to avoid Enter being swallowed
-tmux send-keys -t <session-name> 'cd ~/projects/<project> && claude --dangerously-skip-permissions'
-tmux send-keys -t <session-name> Enter
-```
+## Step 2 — Implement
 
-Wait ~12s for Claude Code to load, then verify it's ready by capturing pane output.
+Work through the planning doc in order. Spawn sub-agents for independent tasks when helpful. Report when each step completes before moving on.
 
-**Auto-accept strategy:**
-- `--dangerously-skip-permissions` handles file edits automatically
-- For bash command prompts that still appear: open a new tmux window (`tmux new-window -t <session-name> -n shell`) and run commands directly there — do NOT loop-approve in Claude Code
+---
 
-## Step 4 — Send Task to Claude Code
+## Step 3 — Tests must pass 100%
 
-Send the confirmed plan from Step 1 as a single prompt. Include:
-- What files to change
-- Exact logic/behavior required
-- "Write unit tests, wire function into component, run tests, fix until passing"
+- Write unit tests in `tests/unit/` covering every test case in the planning doc.
+- Run `npm test` — all suites must pass, zero failures.
+- If a test fails: fix it. **Never** skip or comment out failing tests.
 
-```bash
-# IMPORTANT: always send the command text and Enter separately
-tmux send-keys -t <session-name> '<full task prompt>'
-tmux send-keys -t <session-name> Enter
-```
+---
 
-Monitor progress by polling every 30–60s:
-```bash
-tmux capture-pane -t <session-name> -p -S -20
-```
+## Step 4 — Stop for review
 
-If Claude Code gets stuck waiting for approval, use the shell window to run commands directly.
-
-## Step 5 — Build & Test
-
-After Claude Code finishes, run in the shell window:
-
-```bash
-# Check what test/build commands are available
-cat package.json | grep -A5 '"scripts"'
-cat Makefile 2>/dev/null | grep -E '^[a-z].*:' | head -20
-
-# Run build first
-npx next build 2>&1 | tail -5
-# → must have NO "Type error" (Dynamic server warnings are OK)
-
-# Run tests
-npx jest --no-coverage 2>&1 | tail -15
-# → must be 100% pass
-```
-
-**If build fails → fix before deploying. Do not skip.**
-
-## Step 6 — Visual Verification (UI changes only)
+Pause and ask the user to confirm before opening a PR.
 
 If the task involves UI changes:
 
-```bash
 # Window 1: dev server
 npm run dev  # note port (3000 or 3001 if occupied)
 
 # Window 2: tunnel
 cloudflared tunnel --url http://localhost:<port>
 # → outputs URL: https://<random>.trycloudflare.com
-```
+Report the tunnel URL to the user and wait for visual confirmation before deploying.
 
-**Report the tunnel URL to the user and wait for visual confirmation before deploying.**
+Alternatively, use web_fetch or logic simulation (Python script with real API data) to verify behavior programmatically.
 
-Alternatively, use `web_fetch` or logic simulation (Python script with real API data) to verify behavior programmatically.
+---
 
-## Step 7 — Deploy (optional)
+## Step 5 — Open PR to main
 
-Ask the user: "Would you like to deploy as well?"
-
-If yes:
 ```bash
-# In shell window
-make deploy 2>&1 | tail -10
+git add <files>
+git commit -m "<english commit message>"
+git push -u origin <branch-name>
+gh pr create --title "..." --body "..."
 ```
 
-Verify:
-- digest hash changed from previous deploy
-- webhook accepted: `{"status":"accepted"}`
-- Report: "Deploy successful — digest `sha256:xxxxxxxx` | `https://<production-url>`"
+### Strict rules
 
-## Memory
-
-Save to memory after first successful run:
-- Project name → path mapping (e.g. `running-coach` → `~/projects/running-coach`)
-- Deploy URL
-
-**Do NOT save session name** — infer fresh from task context each time.
-
-## Common Issues
-
-| Problem | Fix |
-|---------|-----|
-| Claude Code keeps asking approval | Open `tmux new-window` shell, run commands directly |
-| Build fails: Type error | Fix type mismatch before deploying |
-| Tests fail after code change | Fix root cause, don't skip tests |
-| Tunnel not available | Use Python logic simulation with real API data instead |
+- Commit message, PR title, and PR body: **English only**.
+- **Never** include "by Claude Code" or "Co-Authored-By: Claude" in commits or PRs.
+- **Never** use Thai anywhere — not in comments, code, tests, commit messages, PR titles, or descriptions.
+- **Never** embed real secrets in code, tests, or comments — no chat IDs, API keys, usernames, session IDs, or tokens. Use placeholder/fake values only.
