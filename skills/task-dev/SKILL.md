@@ -43,17 +43,17 @@ Work through the planning doc in order. Spawn sub-agents for independent tasks w
 
 Pause and ask the user to confirm before opening a PR.
 
-If the task involves UI changes:
+If the task involves UI changes, spin up a preview so the user can verify visually:
 
-# Window 1: dev server
-npm run dev  # note port (3000 or 3001 if occupied)
+```bash
+# Terminal 1 — dev server (kill any existing dev server first to reuse the same port)
+npm run dev
 
-# Window 2: tunnel
+# Terminal 2 — public tunnel
 cloudflared tunnel --url http://localhost:<port>
-# → outputs URL: https://<random>.trycloudflare.com
-Report the tunnel URL to the user and wait for visual confirmation before deploying.
+```
 
-Alternatively, use web_fetch or logic simulation (Python script with real API data) to verify behavior programmatically.
+Verify the tunnel is working by curling the public URL — confirm you get actual HTML from the app, not a Cloudflare error page. Only then report the URL to the user and wait for their go-ahead.
 
 ---
 
