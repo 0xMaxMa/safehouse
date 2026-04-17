@@ -6,8 +6,8 @@ DEV_USER=${DEV_USER:-dev}
 SSH_PORT=${SSH_PORT:-2222}
 CODE_SERVER_PORT=${CODE_SERVER_PORT:-8080}
 CODE_SERVER_PASSWORD=${CODE_SERVER_PASSWORD:-changeme}
-OPENCLAW_GATEWAY_BIND=${OPENCLAW_GATEWAY_BIND:-lan}
-OPENCLAW_GATEWAY_PORT=${OPENCLAW_GATEWAY_PORT:-18789}
+# OPENCLAW_GATEWAY_BIND=${OPENCLAW_GATEWAY_BIND:-lan}
+# OPENCLAW_GATEWAY_PORT=${OPENCLAW_GATEWAY_PORT:-18789}
 
 echo "🚀 Starting dev server container..."
 
@@ -54,7 +54,7 @@ chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.config/code-server
 CODE_SERVER_SETTINGS=/home/${DEV_USER}/.local/share/code-server/User/settings.json
 mkdir -p "$(dirname $CODE_SERVER_SETTINGS)"
 [ ! -f "$CODE_SERVER_SETTINGS" ] && cp /etc/code-server-settings.json "$CODE_SERVER_SETTINGS"
-chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.local/share/code-server
+chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.local/share/code-server 2>/dev/null || true
 
 # Ensure projects dir exists in home
 mkdir -p /home/${DEV_USER}/projects
@@ -69,8 +69,8 @@ echo "✅ code-server ready — port ${CODE_SERVER_PORT}"
 su - ${DEV_USER} -c "PASSWORD='${CODE_SERVER_PASSWORD}' code-server --config ${CODE_SERVER_CONFIG}" &
 
 # Openclaw gateway
-sudo -u ${DEV_USER} openclaw gateway --bind ${OPENCLAW_GATEWAY_BIND} --port ${OPENCLAW_GATEWAY_PORT} &
-echo "✅ openclaw gateway ready — port ${OPENCLAW_GATEWAY_PORT}"
+# sudo -u ${DEV_USER} openclaw gateway --bind ${OPENCLAW_GATEWAY_BIND} --port ${OPENCLAW_GATEWAY_PORT} &
+# echo "✅ openclaw gateway ready — port ${OPENCLAW_GATEWAY_PORT}"
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -79,8 +79,8 @@ echo "  Host: YOUR_SERVER_IP  Port: ${SSH_PORT}  User: ${DEV_USER}"
 echo ""
 echo "  iPad / Browser → http://YOUR_SERVER_IP:${CODE_SERVER_PORT}"
 echo "  Password: ${CODE_SERVER_PASSWORD}"
-echo ""
-echo "  Openclaw Gateway → port ${OPENCLAW_GATEWAY_PORT}"
+# echo ""
+# echo "  Openclaw Gateway → port ${OPENCLAW_GATEWAY_PORT}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 tail -f /dev/null
