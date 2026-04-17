@@ -19,7 +19,14 @@ RUN apt-get update && apt-get install -y --fix-missing \
     gnupg \
     htop \
     jq \
+    unzip \
+    zsh \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Bun
+RUN curl -fsSL https://bun.com/install | bash \
+    && cp /root/.bun/bin/bun /usr/local/bin/bun \
+    && chmod 755 /usr/local/bin/bun
 
 # Install Node.js 22.x (latest LTS)
 RUN mkdir -p /etc/apt/keyrings \
@@ -54,12 +61,17 @@ RUN curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | gpg --dearmor -o
     && apt-get install -y cloudflared \
     && rm -rf /var/lib/apt/lists/*
 
+# Install oh-my-zsh system-wide (home dir is volume-mounted, so ~/.oh-my-zsh won't survive)
+RUN git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git /opt/oh-my-zsh \
+    && git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions /opt/oh-my-zsh/custom/plugins/zsh-autosuggestions \
+    && git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting /opt/oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+
 # Install Claude CLI + Openclaw
 RUN npm install -g @anthropic-ai/claude-code@latest openclaw@latest
 
 # Create dev user (remove pre-existing ubuntu user to free UID 1000)
 RUN userdel -r ubuntu 2>/dev/null || true \
-    && useradd -m -s /bin/bash --uid 1000 ${DEV_USER} \
+    && useradd -m -s /bin/zsh --uid 1000 ${DEV_USER} \
     && echo "${DEV_USER}:${DEV_USER_PASSWORD}" | chpasswd \
     && echo "${DEV_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
@@ -73,7 +85,7 @@ RUN mkdir /var/run/sshd \
 # (home dir is volume-mounted, so nothing copied there will persist)
 COPY code-server-config.yaml /etc/code-server-config.yaml
 COPY code-server-settings.json /etc/code-server-settings.json
-COPY .bashrc /etc/safehouse-bashrc
+COPY .zshrc /etc/safehouse-zshrc
 
 COPY start.sh /start.sh
 RUN chmod +x /start.sh

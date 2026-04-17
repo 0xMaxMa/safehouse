@@ -40,16 +40,9 @@ if [ -f "$TMUX_CONF" ] && [ ! -L "$TMUX_LINK" ]; then
     chown -h ${DEV_USER}:${DEV_USER} "$TMUX_LINK"
 fi
 
-# Always update .bashrc from template (picks up changes on rebuild)
-BASHRC=/home/${DEV_USER}/.bashrc
-cp /etc/safehouse-bashrc "$BASHRC" && chown ${DEV_USER}:${DEV_USER} "$BASHRC"
-
-# Ensure .bash_profile sources .bashrc (SSH login shells don't load .bashrc directly)
-BASH_PROFILE=/home/${DEV_USER}/.bash_profile
-if [ ! -f "$BASH_PROFILE" ]; then
-    echo '[ -f ~/.bashrc ] && . ~/.bashrc' > "$BASH_PROFILE"
-    chown ${DEV_USER}:${DEV_USER} "$BASH_PROFILE"
-fi
+# Always update .zshrc from template (picks up changes on rebuild)
+ZSHRC=/home/${DEV_USER}/.zshrc
+cp /etc/safehouse-zshrc "$ZSHRC" && chown ${DEV_USER}:${DEV_USER} "$ZSHRC"
 
 # Ensure code-server config exists (volume mount wipes Dockerfile COPY)
 CODE_SERVER_CONFIG=/home/${DEV_USER}/.config/code-server/config.yaml
@@ -66,6 +59,10 @@ chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.local/share/code-server
 # Ensure projects dir exists in home
 mkdir -p /home/${DEV_USER}/projects
 chown ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/projects
+
+# Ensure npm global prefix dir exists (user-local, no sudo needed)
+mkdir -p /home/${DEV_USER}/.npm-global
+chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.npm-global
 
 # code-server (iPad / browser)
 echo "✅ code-server ready — port ${CODE_SERVER_PORT}"

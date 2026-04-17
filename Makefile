@@ -34,9 +34,9 @@ logs: ## Follow container logs
 # --------------------
 # Maintenance
 # --------------------
-update-startup: ## Update start.sh + .bashrc without rebuilding image
+update-startup: ## Update start.sh + .zshrc without rebuilding image
 	docker compose down
-	cp build/.bashrc $(HOST_HOME)/.bashrc
+	cp build/.zshrc $(HOST_HOME)/.zshrc
 
 update-password: ## Update SSH + code-server password
 	./scripts/update_password.sh
