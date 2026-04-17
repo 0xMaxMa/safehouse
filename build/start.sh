@@ -54,7 +54,7 @@ chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.config/code-server
 CODE_SERVER_SETTINGS=/home/${DEV_USER}/.local/share/code-server/User/settings.json
 mkdir -p "$(dirname $CODE_SERVER_SETTINGS)"
 [ ! -f "$CODE_SERVER_SETTINGS" ] && cp /etc/code-server-settings.json "$CODE_SERVER_SETTINGS"
-chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.local/share/code-server
+chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.local/share/code-server 2>/dev/null || true
 
 # Ensure projects dir exists in home
 mkdir -p /home/${DEV_USER}/projects

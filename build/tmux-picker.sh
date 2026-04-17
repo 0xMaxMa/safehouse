@@ -1,21 +1,30 @@
-#!/bin/bash
-# Shared tmux session picker — sourced by .bashrc and .zshrc
-[[ $- != *i* ]] && return
+#!/bin/zsh
+# Shared tmux session picker (zsh)
+case $- in *i*) ;; *) return;; esac
 
-# Interactive tmux session picker
-_tmux_pick() {
-    local sessions=()
-    mapfile -t sessions < <(tmux list-sessions -F "#S" 2>/dev/null)
+_load_sessions() {
+    sessions=()
+    local line
+    while IFS= read -r line; do
+        sessions+=("$line")
+    done < <(tmux list-sessions -F "#S" 2>/dev/null)
     sessions+=("[+ new session]")
+    total=${#sessions[@]}
+}
+
+_tmux_pick() {
+    local -a sessions
+    _load_sessions
+    local sel=1
     local total=${#sessions[@]}
-    local sel=0
 
     _draw() {
         clear >/dev/tty
         printf "\e[1;35mWelcome to Safehouse\e[0m\n\n" >/dev/tty
         printf "Select tmux session  (↑↓ move · Enter select · d delete)\n\n" >/dev/tty
-        for i in "${!sessions[@]}"; do
-            if [ "$i" -eq "$sel" ]; then
+        local i
+        for (( i=1; i<=total; i++ )); do
+            if (( i == sel )); then
                 printf "    \e[7m%-30s\e[0m\n" "${sessions[$i]}" >/dev/tty
             else
                 printf "    %-30s\n" "${sessions[$i]}" >/dev/tty
@@ -25,63 +34,60 @@ _tmux_pick() {
 
     _refresh_sessions() {
         local old_sel="${sessions[$sel]:-}"
-        sessions=()
-        mapfile -t sessions < <(tmux list-sessions -F "#S" 2>/dev/null)
-        sessions+=("[+ new session]")
+        _load_sessions
         total=${#sessions[@]}
-        # preserve cursor on same session name
-        if [ -n "$old_sel" ]; then
-            for i in "${!sessions[@]}"; do
+        if [[ -n "$old_sel" ]]; then
+            local i
+            for (( i=1; i<=total; i++ )); do
                 [[ "${sessions[$i]}" == "$old_sel" ]] && sel=$i && break
             done
         fi
-        ((sel >= total)) && sel=$((total - 1))
+        (( sel > total )) && sel=$total
     }
 
     tput civis >/dev/tty
     _draw
 
+    local key
     while true; do
-        IFS= read -rsn1 -t 2 key </dev/tty
-        local rc=$?
-        if [[ $rc -gt 128 ]]; then
+        key=""
+        if read -rsk1 -t 2 key </dev/tty 2>/dev/null; then
+            if [[ "$key" == $'\x1b' ]]; then
+                local seq=""
+                read -rsk2 -t 0.1 seq </dev/tty 2>/dev/null
+                case "$seq" in
+                    '[A') (( sel > 1 )) && (( sel-- )) ;;
+                    '[B') (( sel < total )) && (( sel++ )) ;;
+                esac
+            elif [[ "$key" == $'\n' || "$key" == $'\r' || -z "$key" ]]; then
+                tput cnorm >/dev/tty
+                echo "${sessions[$sel]}"
+                return
+            elif [[ "$key" == 'd' ]]; then
+                local name="${sessions[$sel]}"
+                if [[ "$name" != "[+ new session]" ]]; then
+                    tput cnorm >/dev/tty
+                    clear >/dev/tty
+                    local confirm=""
+                    printf "Delete '%s'? [y/N]: " "$name" >/dev/tty
+                    read -r confirm </dev/tty
+                    if [[ "$confirm" == [yY] ]]; then
+                        tmux kill-session -t "$name" 2>/dev/null
+                    fi
+                    _load_sessions
+                    total=${#sessions[@]}
+                    (( sel > total )) && sel=$total
+                    tput civis >/dev/tty
+                fi
+            fi
+        else
             # read timed out — refresh list
             _refresh_sessions
-            _draw
-            continue
-        fi
-        if [[ $key == $'\x1b' ]]; then
-            read -rsn2 -t 0.1 seq </dev/tty
-            case $seq in
-                '[A') ((sel > 0)) && ((sel--)) ;;
-                '[B') ((sel < total - 1)) && ((sel++)) ;;
-            esac
-        elif [[ $key == '' ]]; then
-            tput cnorm >/dev/tty
-            echo "${sessions[$sel]}"
-            return
-        elif [[ $key == 'd' ]]; then
-            local name="${sessions[$sel]}"
-            if [[ $name != "[+ new session]" ]]; then
-                tput cnorm >/dev/tty
-                clear >/dev/tty
-                read -p "Delete '$name'? [y/N]: " confirm </dev/tty >/dev/tty
-                if [[ $confirm == [yY] ]]; then
-                    tmux kill-session -t "$name" 2>/dev/null
-                fi
-                sessions=()
-                mapfile -t sessions < <(tmux list-sessions -F "#S" 2>/dev/null)
-                sessions+=("[+ new session]")
-                total=${#sessions[@]}
-                ((sel >= total)) && sel=$((total - 1))
-                tput civis >/dev/tty
-            fi
         fi
         _draw
     done
 }
 
-# Select/switch tmux session (works both inside and outside tmux)
 alias ts='tmux-select'
 tmux-select() {
     local result
@@ -89,15 +95,17 @@ tmux-select() {
     tput cnorm >/dev/tty
     clear
 
-    if [[ $result == "[+ new session]" ]]; then
-        read -p "Session name [main]: " name
-        if [ -n "$TMUX" ]; then
+    if [[ "$result" == "[+ new session]" ]]; then
+        local name=""
+        printf "Session name [main]: " >/dev/tty
+        read -r name
+        if [[ -n "$TMUX" ]]; then
             tmux new-session -d -s "${name:-main}" && tmux switch-client -t "${name:-main}"
         else
             tmux new-session -s "${name:-main}"
         fi
-    elif [ -n "$result" ]; then
-        if [ -n "$TMUX" ]; then
+    elif [[ -n "$result" ]]; then
+        if [[ -n "$TMUX" ]]; then
             tmux switch-client -t "$result"
         else
             tmux attach -t "$result" 2>/dev/null || tmux new-session -s "$result"
@@ -106,15 +114,18 @@ tmux-select() {
 }
 
 # Auto-run picker when opening a shell outside tmux
-if command -v tmux &> /dev/null && [ -z "$TMUX" ] && [ -t 0 ]; then
+if command -v tmux &>/dev/null && [[ -z "$TMUX" ]] && [[ -t 0 ]]; then
+    local result
     result=$(_tmux_pick)
     tput cnorm >/dev/tty
     clear
 
-    if [[ $result == "[+ new session]" ]]; then
-        read -p "Session name [main]: " name
+    if [[ "$result" == "[+ new session]" ]]; then
+        local name=""
+        printf "Session name [main]: " >/dev/tty
+        read -r name
         tmux new-session -s "${name:-main}"
-    elif [ -n "$result" ]; then
+    elif [[ -n "$result" ]]; then
         tmux attach -t "$result" 2>/dev/null || tmux new-session -s "$result"
     fi
 fi
