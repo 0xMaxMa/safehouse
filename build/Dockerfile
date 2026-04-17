@@ -86,6 +86,7 @@ RUN mkdir /var/run/sshd \
 COPY code-server-config.yaml /etc/code-server-config.yaml
 COPY code-server-settings.json /etc/code-server-settings.json
 COPY .zshrc /etc/safehouse-zshrc
+COPY tmux-picker.sh /opt/safehouse/tmux-picker.sh
 
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
