@@ -67,7 +67,8 @@ RUN git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git /opt/oh-my-zsh \
     && git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting /opt/oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 
 # Install Claude CLI + Openclaw
-RUN npm install -g @anthropic-ai/claude-code@latest openclaw@latest
+# RUN npm install -g @anthropic-ai/claude-code@latest openclaw@latest
+RUN npm install -g @anthropic-ai/claude-code@latest
 
 # Create dev user (remove pre-existing ubuntu user to free UID 1000)
 RUN userdel -r ubuntu 2>/dev/null || true \
