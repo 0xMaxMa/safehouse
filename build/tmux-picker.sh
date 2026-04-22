@@ -45,6 +45,7 @@ _tmux_pick() {
         (( sel > total )) && sel=$total
     }
 
+    tput smcup >/dev/tty
     tput civis >/dev/tty
     _draw
 
@@ -61,6 +62,7 @@ _tmux_pick() {
                 esac
             elif [[ "$key" == $'\n' || "$key" == $'\r' || -z "$key" ]]; then
                 tput cnorm >/dev/tty
+                tput rmcup >/dev/tty
                 echo "${sessions[$sel]}"
                 return
             elif [[ "$key" == 'd' ]]; then
@@ -92,8 +94,6 @@ alias ts='tmux-select'
 tmux-select() {
     local result
     result=$(_tmux_pick)
-    tput cnorm >/dev/tty
-    clear
 
     if [[ "$result" == "[+ new session]" ]]; then
         local name=""
@@ -117,8 +117,6 @@ tmux-select() {
 if command -v tmux &>/dev/null && [[ -z "$TMUX" ]] && [[ -t 0 ]]; then
     local result
     result=$(_tmux_pick)
-    tput cnorm >/dev/tty
-    clear
 
     if [[ "$result" == "[+ new session]" ]]; then
         local name=""
