@@ -27,8 +27,6 @@ RUN apt-get update && apt-get install -y --fix-missing \
     # noVNC web viewer
     novnc \
     websockify \
-    # Chromium browser
-    chromium-browser \
     # Playwright system dependencies
     libnss3 \
     libatk1.0-0 \
@@ -45,6 +43,11 @@ RUN apt-get update && apt-get install -y --fix-missing \
     libpango-1.0-0 \
     libcairo2 \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Google Chrome stable (real Chrome binary for anti-bot fingerprint)
+RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+    && apt-get install -y ./google-chrome-stable_current_amd64.deb \
+    && rm google-chrome-stable_current_amd64.deb
 
 # Install Bun
 RUN curl -fsSL https://bun.com/install | bash \

@@ -73,16 +73,16 @@ sleep 1
 export DISPLAY=:99
 echo "DISPLAY=:99" >> /etc/environment
 
-# ── VNC Server ───────────────────────────────────────────────
-echo "Starting VNC server..."
-x11vnc -display :99 -nopw -listen 127.0.0.1 -xkb -forever -shared -bg -logfile /tmp/x11vnc.log
-
-# ── noVNC Web Viewer ─────────────────────────────────────────
+# ── noVNC Web Viewer (token routing mode) ────────────────────
+# NOTE: ไม่ start x11vnc global — BrowserModule จัดการ x11vnc per-session เอง
 NOVNC_PORT=${NOVNC_PORT:-6080}
-echo "Starting noVNC on port ${NOVNC_PORT}..."
+echo "Starting noVNC on port ${NOVNC_PORT} (token mode)..."
+touch /tmp/vnc-tokens.cfg
 websockify --web=/usr/share/novnc --daemon \
     --log-file=/tmp/websockify.log \
-    0.0.0.0:${NOVNC_PORT} 127.0.0.1:5900
+    --token-plugin=TokenFile \
+    --token-source=/tmp/vnc-tokens.cfg \
+    0.0.0.0:${NOVNC_PORT}
 echo "✅ noVNC ready — port ${NOVNC_PORT}"
 
 # code-server (iPad / browser)
