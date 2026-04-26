@@ -64,6 +64,27 @@ chown ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/projects
 mkdir -p /home/${DEV_USER}/.npm-global
 chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.npm-global
 
+# ── Virtual Display ──────────────────────────────────────────
+echo "Starting virtual display..."
+Xvfb :99 -screen 0 1280x800x24 -ac +extension GLX +render -noreset &
+XVFB_PID=$!
+sleep 1
+
+export DISPLAY=:99
+echo "DISPLAY=:99" >> /etc/environment
+
+# ── VNC Server ───────────────────────────────────────────────
+echo "Starting VNC server..."
+x11vnc -display :99 -nopw -listen 127.0.0.1 -xkb -forever -shared -bg -logfile /tmp/x11vnc.log
+
+# ── noVNC Web Viewer ─────────────────────────────────────────
+NOVNC_PORT=${NOVNC_PORT:-6080}
+echo "Starting noVNC on port ${NOVNC_PORT}..."
+websockify --web=/usr/share/novnc --daemon \
+    --log-file=/tmp/websockify.log \
+    0.0.0.0:${NOVNC_PORT} 127.0.0.1:5900
+echo "✅ noVNC ready — port ${NOVNC_PORT}"
+
 # code-server (iPad / browser)
 echo "✅ code-server ready — port ${CODE_SERVER_PORT}"
 su - ${DEV_USER} -c "PASSWORD='${CODE_SERVER_PASSWORD}' code-server --config ${CODE_SERVER_CONFIG}" &
@@ -79,6 +100,8 @@ echo "  Host: YOUR_SERVER_IP  Port: ${SSH_PORT}  User: ${DEV_USER}"
 echo ""
 echo "  iPad / Browser → http://YOUR_SERVER_IP:${CODE_SERVER_PORT}"
 echo "  Password: ${CODE_SERVER_PASSWORD}"
+echo ""
+echo "  noVNC Viewer → http://YOUR_SERVER_IP:${NOVNC_PORT}/vnc.html"
 # echo ""
 # echo "  Openclaw Gateway → port ${OPENCLAW_GATEWAY_PORT}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
