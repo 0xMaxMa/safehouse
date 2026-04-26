@@ -78,6 +78,7 @@ echo "DISPLAY=:99" >> /etc/environment
 NOVNC_PORT=${NOVNC_PORT:-6080}
 echo "Starting noVNC on port ${NOVNC_PORT} (token mode)..."
 touch /tmp/vnc-tokens.cfg
+chmod 666 /tmp/vnc-tokens.cfg
 websockify --web=/usr/share/novnc --daemon \
     --log-file=/tmp/websockify.log \
     --token-plugin=TokenFile \
