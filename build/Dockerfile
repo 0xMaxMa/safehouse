@@ -45,7 +45,12 @@ RUN apt-get update && apt-get install -y --fix-missing \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Google Chrome stable (real Chrome binary for anti-bot fingerprint)
-RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+RUN apt-get update && apt-get install -y \
+    fonts-liberation \
+    libgtk-3-0 \
+    xdg-utils \
+    && rm -rf /var/lib/apt/lists/* \
+    && wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
     && apt-get install -y ./google-chrome-stable_current_amd64.deb \
     && rm google-chrome-stable_current_amd64.deb
 
