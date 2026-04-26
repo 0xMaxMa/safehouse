@@ -74,7 +74,7 @@ export DISPLAY=:99
 echo "DISPLAY=:99" >> /etc/environment
 
 # ── noVNC Web Viewer (token routing mode) ────────────────────
-# NOTE: ไม่ start x11vnc global — BrowserModule จัดการ x11vnc per-session เอง
+# NOTE: no global x11vnc — BrowserModule spawns x11vnc per-session
 NOVNC_PORT=${NOVNC_PORT:-6080}
 echo "Starting noVNC on port ${NOVNC_PORT} (token mode)..."
 touch /tmp/vnc-tokens.cfg
