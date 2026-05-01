@@ -21,38 +21,7 @@ RUN apt-get update && apt-get install -y --fix-missing \
     jq \
     unzip \
     zsh \
-    # Virtual display
-    xvfb \
-    x11vnc \
-    # noVNC web viewer
-    novnc \
-    websockify \
-    # Playwright system dependencies
-    libnss3 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libdrm2 \
-    libxkbcommon0 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxfixes3 \
-    libxrandr2 \
-    libgbm1 \
-    libasound2t64 \
-    libpango-1.0-0 \
-    libcairo2 \
     && rm -rf /var/lib/apt/lists/*
-
-# Install Google Chrome stable (real Chrome binary for anti-bot fingerprint)
-RUN apt-get update && apt-get install -y \
-    fonts-liberation \
-    libgtk-3-0 \
-    xdg-utils \
-    && rm -rf /var/lib/apt/lists/* \
-    && wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
-    && apt-get install -y ./google-chrome-stable_current_amd64.deb \
-    && rm google-chrome-stable_current_amd64.deb
 
 # Install Bun
 RUN curl -fsSL https://bun.com/install | bash \
@@ -101,10 +70,6 @@ RUN git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git /opt/oh-my-zsh \
 # RUN npm install -g @anthropic-ai/claude-code@latest openclaw@latest
 RUN npm install -g @anthropic-ai/claude-code@latest
 
-# Install Playwright and browser dependencies
-RUN npm install -g playwright \
-    && npx playwright install-deps chromium
-
 # Create dev user (remove pre-existing ubuntu user to free UID 1000)
 RUN userdel -r ubuntu 2>/dev/null || true \
     && useradd -m -s /bin/zsh --uid 1000 ${DEV_USER} \
@@ -127,6 +92,6 @@ COPY tmux-picker.sh /opt/safehouse/tmux-picker.sh
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
-EXPOSE 22 8080 6080 18789 18790
+EXPOSE 22 8080 18789 18790
 
 CMD ["/start.sh"]
