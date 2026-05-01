@@ -64,28 +64,6 @@ chown ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/projects
 mkdir -p /home/${DEV_USER}/.npm-global
 chown -R ${DEV_USER}:${DEV_USER} /home/${DEV_USER}/.npm-global
 
-# ── Virtual Display ──────────────────────────────────────────
-echo "Starting virtual display..."
-Xvfb :99 -screen 0 1280x800x24 -ac +extension GLX +render -noreset &
-XVFB_PID=$!
-sleep 1
-
-export DISPLAY=:99
-echo "DISPLAY=:99" >> /etc/environment
-
-# ── noVNC Web Viewer (token routing mode) ────────────────────
-# NOTE: no global x11vnc — BrowserModule spawns x11vnc per-session
-NOVNC_PORT=${NOVNC_PORT:-6080}
-echo "Starting noVNC on port ${NOVNC_PORT} (token mode)..."
-touch /tmp/vnc-tokens.cfg
-chmod 666 /tmp/vnc-tokens.cfg
-websockify --web=/usr/share/novnc --daemon \
-    --log-file=/tmp/websockify.log \
-    --token-plugin=TokenFile \
-    --token-source=/tmp/vnc-tokens.cfg \
-    0.0.0.0:${NOVNC_PORT}
-echo "✅ noVNC ready — port ${NOVNC_PORT}"
-
 # code-server (iPad / browser)
 echo "✅ code-server ready — port ${CODE_SERVER_PORT}"
 su - ${DEV_USER} -c "PASSWORD='${CODE_SERVER_PASSWORD}' code-server --config ${CODE_SERVER_CONFIG}" &
@@ -101,8 +79,6 @@ echo "  Host: YOUR_SERVER_IP  Port: ${SSH_PORT}  User: ${DEV_USER}"
 echo ""
 echo "  iPad / Browser → http://YOUR_SERVER_IP:${CODE_SERVER_PORT}"
 echo "  Password: ${CODE_SERVER_PASSWORD}"
-echo ""
-echo "  noVNC Viewer → http://YOUR_SERVER_IP:${NOVNC_PORT}/vnc.html"
 # echo ""
 # echo "  Openclaw Gateway → port ${OPENCLAW_GATEWAY_PORT}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
