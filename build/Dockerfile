@@ -66,6 +66,10 @@ RUN git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git /opt/oh-my-zsh \
     && git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions /opt/oh-my-zsh/custom/plugins/zsh-autosuggestions \
     && git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting /opt/oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 
+# Install Go
+RUN curl -fsSL https://go.dev/dl/go1.24.3.linux-amd64.tar.gz | tar -C /usr/local -xz
+ENV PATH="/usr/local/go/bin:${PATH}"
+
 # Install Claude CLI + Openclaw
 # RUN npm install -g @anthropic-ai/claude-code@latest openclaw@latest
 RUN npm install -g @anthropic-ai/claude-code@latest
